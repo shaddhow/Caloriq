@@ -18,12 +18,12 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   int _step = 1;
 
-  // Form state (all null by default to avoid dummy/demo pre-selections)
+  // Form state with sensible defaults
   String? _gender;
-  int? _age;
-  double _height = 172.0;
-  bool _heightSet = false;
-  double? _weight;
+  int? _age = 24;
+  double _height = 170.18; // 5 ft 7 in (~170 cm)
+  bool _heightSet = true;
+  double? _weight = 68.0;
   String? _activityLevel;
   String? _goal;
   String? _pace;
@@ -31,14 +31,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Height unit state
   String _heightUnit = 'ft'; // 'ft' (Feet & Inches) or 'm' (Meters)
   int _heightFeet = 5;
-  int _heightInches = 8;
-  double _heightMeters = 1.72;
+  int _heightInches = 7;
+  double _heightMeters = 1.70;
 
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (userProvider.isOnboarded) {
+      final p = userProvider.profile;
+      if (p.gender.isNotEmpty) _gender = p.gender;
+      if (p.age > 0) _age = p.age;
+      if (p.height > 0) _height = p.height;
+      if (p.weight > 0) _weight = p.weight;
+      if (p.activityLevel.isNotEmpty) _activityLevel = p.activityLevel;
+      if (p.goal.isNotEmpty) _goal = p.goal;
+      if (p.pace.isNotEmpty) _pace = p.pace;
+      _heightSet = true;
+    }
     _syncHeightFromCm(_height);
   }
 
@@ -327,7 +339,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           valueText: _age == null ? null : '$_age',
           placeholderText: 'Slide to enter age',
           unitText: 'yrs',
-          value: (_age ?? 25).toDouble(),
+          value: (_age ?? 24).toDouble(),
           min: 14,
           max: 80,
           onChanged: (val) => setState(() => _age = val.round()),
@@ -368,7 +380,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           valueText: _weight == null ? null : '${_weight!.round()}',
           placeholderText: 'Slide to enter weight',
           unitText: 'kg',
-          value: _weight ?? 65.0,
+          value: _weight ?? 68.0,
           min: 35,
           max: 160,
           onChanged: (val) => setState(() => _weight = val),
@@ -1922,32 +1934,55 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
           // Value display and Slider controls
           if (_heightUnit == 'ft') ...[
-            // Feet & Inches Display
+            // Feet & Inches Display with Inline Metric Pill
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  _heightSet
-                      ? '$_heightFeet ft $_heightInches in'
-                      : 'Slide to enter height',
+                  '$_heightFeet ft $_heightInches in',
                   style: TextStyle(
-                    fontSize: _heightSet ? 28 : 14,
-                    fontWeight: _heightSet ? FontWeight.w800 : FontWeight.w600,
-                    letterSpacing: _heightSet ? -0.8 : 0,
-                    color: _heightSet
-                        ? (isDark ? Colors.white : AppTheme.ink)
-                        : Theme.of(context).hintColor,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.8,
+                    color: isDark ? Colors.white : AppTheme.ink,
                   ),
                 ),
-                if (_heightSet)
-                  Text(
-                    '$_heightFeet ft $_heightInches in',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).hintColor,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF2A2A33)
+                        : const Color(0xFFF1EFE9),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF383844)
+                          : const Color(0xFFE2DFD7),
+                      width: 1,
                     ),
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.straighten,
+                        size: 14,
+                        color: Theme.of(context).hintColor,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        '${_height.round()} cm',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : AppTheme.ink,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -2044,21 +2079,53 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ],
             ),
           ] else ...[
-            // Meter Display
+            // Meter Display with Inline Imperial Pill
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  _heightSet
-                      ? '${_heightMeters.toStringAsFixed(2)} m'
-                      : 'Slide to enter height',
+                  '${_heightMeters.toStringAsFixed(2)} m',
                   style: TextStyle(
-                    fontSize: _heightSet ? 28 : 14,
-                    fontWeight: _heightSet ? FontWeight.w800 : FontWeight.w600,
-                    letterSpacing: _heightSet ? -0.8 : 0,
-                    color: _heightSet
-                        ? (isDark ? Colors.white : AppTheme.ink)
-                        : Theme.of(context).hintColor,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.8,
+                    color: isDark ? Colors.white : AppTheme.ink,
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF2A2A33)
+                        : const Color(0xFFF1EFE9),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF383844)
+                          : const Color(0xFFE2DFD7),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.straighten,
+                        size: 14,
+                        color: Theme.of(context).hintColor,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        '$_heightFeet ft $_heightInches in',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : AppTheme.ink,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -2084,58 +2151,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
           ],
-
-          const SizedBox(height: 14),
-          const Divider(height: 1, thickness: 1),
-          const SizedBox(height: 12),
-
-          // Auto-set Centimeter Output Container
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppTheme.lime.withValues(alpha: 0.15)
-                  : AppTheme.lime.withValues(alpha: 0.35),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: AppTheme.lime,
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.auto_awesome,
-                      size: 16,
-                      color: isDark ? Colors.white : AppTheme.ink,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Centimeter (Auto set):',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : AppTheme.ink,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  _heightSet ? '${_height.round()} cm' : 'Adjust above to set',
-                  style: TextStyle(
-                    fontSize: _heightSet ? 18 : 13,
-                    fontWeight: _heightSet ? FontWeight.w800 : FontWeight.w600,
-                    color: _heightSet
-                        ? (isDark ? Colors.white : AppTheme.ink)
-                        : Theme.of(context).hintColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
