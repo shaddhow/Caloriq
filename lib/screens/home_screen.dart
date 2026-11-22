@@ -100,161 +100,264 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 2. VIBRANT HERO CARD (Daily Budget - Tiya Lime Accent in Light Mode)
+              // 2. ULTRA-PREMIUM TELEMETRY HERO CARD
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF26262F) : AppTheme.lime,
+                  color: isDark ? const Color(0xFF191922) : Colors.white,
                   borderRadius: AppTheme.cardsBorderRadius,
-                  border: isDark
-                      ? null
-                      : Border.all(
-                          color: AppTheme.ink.withValues(alpha: 0.08),
-                          width: 1,
-                        ),
-                  boxShadow: isDark
-                      ? null
-                      : [
-                          BoxShadow(
-                            color: AppTheme.lime.withValues(alpha: 0.40),
-                            blurRadius: 20,
-                            offset: const Offset(0, 6),
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF2C2C3A)
+                        : const Color(0xFFECE9E2),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.35 : 0.04,
+                      ),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.15 : 0.02,
+                      ),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
+                    // Top Telemetry Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Daily budget',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? const Color(0xFF9A9AA6)
-                                : const Color(0xFF2E3520),
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.lime,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'DAILY BUDGET',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.8,
+                                color: isDark
+                                    ? const Color(0xFF9A9AA6)
+                                    : const Color(0xFF7A7A88),
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '$budget kcal',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : AppTheme.ink,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF242430)
+                                : const Color(0xFFF4F3EE),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '$budget kcal',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : AppTheme.ink,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
 
-                    // Animated Calorie Ring
+                    // Animated Calorie Ring with SweepGradient Arc
                     _CalorieRing(
                       eatenKcal: totalEaten,
                       budgetKcal: budget,
-                      size: 196,
+                      size: 204,
                       isDark: isDark,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
 
+                    // Metric Chips Row (Eaten & Burned Telemetry)
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        RichText(
-                          text: TextSpan(
-                            style: TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
-                              fontSize: 13,
+                        // Eaten Chip
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
                               color: isDark
-                                  ? const Color(0xFF9A9AA6)
-                                  : const Color(0xFF384227),
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '$totalEaten',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark ? Colors.white : AppTheme.ink,
-                                ),
-                              ),
-                              const TextSpan(text: ' eaten'),
-                            ],
-                          ),
-                        ),
-                        if (totalEaten > budget)
-                          Text(
-                            '+${totalEaten - budget} surplus',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.coral,
-                            ),
-                          )
-                        else
-                          RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: 13,
+                                  ? const Color(0xFF22222D)
+                                  : const Color(0xFFF6F5F0),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
                                 color: isDark
-                                    ? const Color(0xFF9A9AA6)
-                                    : const Color(0xFF384227),
+                                    ? const Color(0xFF2E2E3C)
+                                    : const Color(0xFFECE9E2),
+                                width: 1,
                               ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                TextSpan(
-                                  text: '$burned',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : AppTheme.ink,
+                                const Icon(
+                                  Icons.restaurant_rounded,
+                                  size: 13,
+                                  color: Color(0xFF8A8A98),
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: RichText(
+                                    overflow: TextOverflow.ellipsis,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'Plus Jakarta Sans',
+                                        fontSize: 12,
+                                        color: isDark
+                                            ? const Color(0xFF9A9AA6)
+                                            : const Color(0xFF6E6E7C),
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: '$totalEaten',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            color: isDark
+                                                ? Colors.white
+                                                : AppTheme.ink,
+                                          ),
+                                        ),
+                                        const TextSpan(text: ' eaten'),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                const TextSpan(text: ' burned'),
                               ],
                             ),
                           ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Burned / Surplus Chip
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF22222D)
+                                  : const Color(0xFFF6F5F0),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF2E2E3C)
+                                    : const Color(0xFFECE9E2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  totalEaten > budget
+                                      ? Icons.warning_amber_rounded
+                                      : Icons.local_fire_department_rounded,
+                                  size: 14,
+                                  color: totalEaten > budget
+                                      ? AppTheme.coral
+                                      : const Color(0xFFFF8A3D),
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: totalEaten > budget
+                                      ? Text(
+                                          '+${totalEaten - budget} surplus',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppTheme.coral,
+                                          ),
+                                        )
+                                      : RichText(
+                                          overflow: TextOverflow.ellipsis,
+                                          text: TextSpan(
+                                            style: TextStyle(
+                                              fontFamily: 'Plus Jakarta Sans',
+                                              fontSize: 12,
+                                              color: isDark
+                                                  ? const Color(0xFF9A9AA6)
+                                                  : const Color(0xFF6E6E7C),
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: '$burned',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w800,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : AppTheme.ink,
+                                                ),
+                                              ),
+                                              const TextSpan(text: ' burned'),
+                                            ],
+                                          ),
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
 
                     const SizedBox(height: 18),
-                    Divider(
-                      color: isDark
-                          ? const Color(0xFF2E2E38)
-                          : AppTheme.ink.withValues(alpha: 0.12),
-                      height: 1,
-                    ),
-                    const SizedBox(height: 16),
 
-                    // 3 Macro Targets vs Consumed (Protein, Carbs, Fat)
+                    // 3 Macro Telemetry Pods (Protein, Carbs, Fat)
                     Row(
                       children: [
                         _buildMacroColumn(
                           label: 'PROTEIN',
                           consumed: mealProvider.totalProtein.round(),
                           target: (budget * 0.30 / 4).round(),
-                          color: const Color(0xFFFF725E),
+                          color: const Color(0xFFFF6554),
                           isDark: isDark,
                         ),
-                        const SizedBox(width: 14),
+                        const SizedBox(width: 8),
                         _buildMacroColumn(
                           label: 'CARBS',
                           consumed: mealProvider.totalCarbs.round(),
                           target: (budget * 0.45 / 4).round(),
-                          color: const Color(0xFFF5B842),
+                          color: const Color(0xFFF5A623),
                           isDark: isDark,
                         ),
-                        const SizedBox(width: 14),
+                        const SizedBox(width: 8),
                         _buildMacroColumn(
                           label: 'FAT',
                           consumed: mealProvider.totalFat.round(),
                           target: (budget * 0.25 / 9).round(),
-                          color: const Color(0xFF56C5C5),
+                          color: const Color(0xFF2AC4B3),
                           isDark: isDark,
                         ),
                       ],
@@ -436,7 +539,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Macro Column Builder
+  // Macro Column Builder as Sleek Telemetry Pods
   static Widget _buildMacroColumn({
     required String label,
     required int consumed,
@@ -448,70 +551,94 @@ class HomeScreen extends StatelessWidget {
         target > 0 ? (consumed / target).clamp(0.0, 1.0) : 0.0;
 
     return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                  color: isDark
-                      ? const Color(0xFF9A9AA6)
-                      : const Color(0xFF384227),
-                ),
-              ),
-              Text(
-                '${consumed}g',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : AppTheme.ink,
-                ),
-              ),
-            ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF20202A) : const Color(0xFFF7F6F1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF2B2B38) : const Color(0xFFECE9E2),
+            width: 1,
           ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: Stack(
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  height: 5,
-                  width: double.infinity,
-                  color: isDark
-                      ? const Color(0xFF2E2E38)
-                      : AppTheme.ink.withValues(alpha: 0.12),
-                ),
-                FractionallySizedBox(
-                  widthFactor: progress,
-                  child: Container(
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(99),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
                     ),
+                    const SizedBox(width: 4),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                        color: isDark
+                            ? const Color(0xFF9A9AA6)
+                            : const Color(0xFF7A7A88),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '${consumed}g',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : AppTheme.ink,
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Target ${target}g',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? const Color(0xFF7A7A88)
-                  : const Color(0xFF4C5835),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(99),
+              child: Stack(
+                children: [
+                  Container(
+                    height: 5,
+                    width: double.infinity,
+                    color: isDark
+                        ? const Color(0xFF2B2B38)
+                        : const Color(0xFFE5E2D9),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: progress,
+                    child: Container(
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 5),
+            Text(
+              'Target ${target}g',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? const Color(0xFF7A7A88)
+                    : const Color(0xFF90909E),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1174,7 +1301,7 @@ class _CalorieRingState extends State<_CalorieRing>
                   eatenKcal: widget.eatenKcal,
                   budgetKcal: widget.budgetKcal,
                   progress: _animation.value,
-                  strokeWidth: 14.0,
+                  strokeWidth: 15.0,
                   isDark: widget.isDark,
                 ),
               ),
@@ -1185,25 +1312,40 @@ class _CalorieRingState extends State<_CalorieRing>
                     '${isSurplus ? remaining.abs() : remaining}',
                     style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 42,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1.5,
+                      fontSize: 44,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1.8,
                       color: widget.isDark ? Colors.white : AppTheme.ink,
                       height: 1.0,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    isSurplus ? 'kcal over' : 'kcal left',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
                       color: isSurplus
-                          ? AppTheme.coral
+                          ? AppTheme.coral.withValues(alpha: 0.12)
                           : (widget.isDark
-                              ? const Color(0xFF9A9AA6)
-                              : const Color(0xFF384227)),
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : const Color(0xFFF1EFEA)),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      isSurplus ? 'KCAL OVER' : 'KCAL LEFT',
+                      style: TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                        color: isSurplus
+                            ? AppTheme.coral
+                            : (widget.isDark
+                                ? const Color(0xFFB0B0BE)
+                                : const Color(0xFF6E6E7C)),
+                      ),
                     ),
                   ),
                 ],
@@ -1216,7 +1358,7 @@ class _CalorieRingState extends State<_CalorieRing>
   }
 }
 
-// Custom Painter for Calorie Ring Arc
+// Custom Painter for Calorie Ring Arc with SweepGradient
 class _CalorieRingPainter extends CustomPainter {
   final int eatenKcal;
   final int budgetKcal;
@@ -1237,11 +1379,9 @@ class _CalorieRingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    // Background Track
+    // Background Track (Smooth Silky Base)
     final trackPaint = Paint()
-      ..color = isDark
-          ? const Color(0xFF2A2A33)
-          : AppTheme.ink.withValues(alpha: 0.12)
+      ..color = isDark ? const Color(0xFF252532) : const Color(0xFFEFECE5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -1257,14 +1397,42 @@ class _CalorieRingPainter extends CustomPainter {
 
     final isSurplus = eatenKcal > budgetKcal;
     final activePaint = Paint()
-      ..color = isSurplus
-          ? AppTheme.coral
-          : (isDark ? AppTheme.lime : AppTheme.ink)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
     if (sweepAngle > 0.01) {
+      if (isSurplus) {
+        activePaint.color = AppTheme.coral;
+      } else {
+        activePaint.shader = SweepGradient(
+          startAngle: startAngle,
+          endAngle: startAngle + sweepAngle,
+          colors: isDark
+              ? const [Color(0xFFD4FF66), Color(0xFF8CE615)]
+              : const [Color(0xFFB2F042), Color(0xFF6CD410)],
+        ).createShader(Rect.fromCircle(center: center, radius: radius));
+      }
+
+      // Soft ambient glow under arc in dark mode
+      if (isDark) {
+        final glowPaint = Paint()
+          ..color = (isSurplus ? AppTheme.coral : AppTheme.lime)
+              .withValues(alpha: 0.22)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth + 6
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
+          ..strokeCap = StrokeCap.round;
+
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: radius),
+          startAngle,
+          sweepAngle,
+          false,
+          glowPaint,
+        );
+      }
+
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,
