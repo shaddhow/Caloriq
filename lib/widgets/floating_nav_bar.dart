@@ -44,37 +44,35 @@ class _FloatingNavBarState extends State<FloatingNavBar>
       _fromIndex = widget.currentIndex.toDouble();
       _toIndex = widget.currentIndex.toDouble();
 
-      // 1. Slide transition controller
+      // 1. Slide transition controller (280ms with easeOutCubic for responsive gliding)
       _slideController = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 320),
+        duration: const Duration(milliseconds: 280),
       );
 
       _slideAnimation = CurvedAnimation(
         parent: _slideController!,
-        curve: Curves.easeInOutCubic,
+        curve: Curves.easeOutCubic,
       );
 
       // 2. Interactive neon glow flare controller
       _glowController = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 1400),
+        duration: const Duration(milliseconds: 400),
       );
 
       _glowAnimation = TweenSequence<double>([
         TweenSequenceItem(
           tween: Tween<double>(begin: 0.0, end: 1.0)
               .chain(CurveTween(curve: Curves.easeOutQuad)),
-          weight: 22.0, // fast burst flare (approx 300ms)
+          weight: 35.0,
         ),
         TweenSequenceItem(
           tween: Tween<double>(begin: 1.0, end: 0.0)
-              .chain(CurveTween(curve: Curves.easeInCubic)),
-          weight: 78.0, // graceful decay back to clean resting state
+              .chain(CurveTween(curve: Curves.easeInQuad)),
+          weight: 65.0,
         ),
       ]).animate(_glowController!);
-
-      _glowController!.forward(from: 0.0);
     }
   }
 
@@ -83,7 +81,9 @@ class _FloatingNavBarState extends State<FloatingNavBar>
     super.didUpdateWidget(oldWidget);
     _ensureInitialized();
     if (oldWidget.currentIndex != widget.currentIndex) {
-      _fromIndex = _toIndex;
+      // Calculate current visual position to prevent jump on rapid multi-tap
+      final double progress = _slideAnimation?.value ?? 1.0;
+      _fromIndex = _fromIndex + (_toIndex - _fromIndex) * progress;
       _toIndex = widget.currentIndex.toDouble();
       _slideController?.forward(from: 0.0);
 
@@ -173,7 +173,7 @@ class _FloatingNavBarState extends State<FloatingNavBar>
                                   size: 22,
                                   color: isDark
                                       ? const Color(0xFF90909E)
-                                      : const Color(0xFF8A8A96),
+                                      : const Color(0xFF71717A),
                                 ),
                               ),
                             ),
@@ -197,35 +197,22 @@ class _FloatingNavBarState extends State<FloatingNavBar>
                           color: AppTheme.lime,
                           shape: BoxShape.circle,
                           boxShadow: [
-                            // 1. Clean crisp base drop shadow for elevation
                             BoxShadow(
                               color: Colors.black.withValues(
-                                alpha: isDark ? 0.45 : 0.16,
+                                alpha: isDark ? 0.35 : 0.14,
                               ),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
                             ),
-
-                            // 2. Interactive Neon Burst Flare (blooms on tap, then smoothly fades out!)
-                            if (glowValue > 0.01) ...[
+                            if (glowValue > 0.01)
                               BoxShadow(
                                 color: AppTheme.lime.withValues(
-                                  alpha: (isDark ? 0.70 : 0.50) * glowValue,
+                                  alpha: (isDark ? 0.60 : 0.40) * glowValue,
                                 ),
-                                blurRadius:
-                                    (isDark ? 22.0 : 16.0) * glowValue,
-                                spreadRadius: 2.0 * glowValue,
-                                offset: const Offset(0, 2),
+                                blurRadius: 14.0 * glowValue,
+                                spreadRadius: 1.0 * glowValue,
+                                offset: const Offset(0, 1),
                               ),
-                              if (isDark)
-                                BoxShadow(
-                                  color: AppTheme.lime.withValues(
-                                    alpha: 0.40 * glowValue,
-                                  ),
-                                  blurRadius: 36.0 * glowValue,
-                                  spreadRadius: 4.0 * glowValue,
-                                ),
-                            ],
                           ],
                         ),
                         child: Center(

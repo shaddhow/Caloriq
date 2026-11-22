@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/food_item.dart';
 import '../providers/meal_provider.dart';
+import '../providers/user_profile_provider.dart';
+import '../services/ai_food_scanner_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/food_data.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_card.dart';
+import '../widgets/glassy_badge.dart';
+import 'ai_food_scanner_screen.dart';
 
 class FoodLoggerScreen extends StatefulWidget {
   final String? initialMealType;
@@ -18,6 +22,7 @@ class FoodLoggerScreen extends StatefulWidget {
 
 class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
   late String _selectedTab;
+  String? _selectedCuisine;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -82,6 +87,52 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
     });
   }
 
+  bool _isAiEstimating = false;
+
+  Future<void> _estimateWithAi(String query, String activeCuisine) async {
+    if (query.trim().isEmpty) return;
+    setState(() => _isAiEstimating = true);
+
+    try {
+      final item = await AiFoodScannerService.estimateNutritionForFood(
+        query: query,
+        cuisine: activeCuisine,
+      );
+      if (!mounted) return;
+      _addFoodItem(item);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: AppTheme.lime, size: 16),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Added "${item.name}" (${item.kcal} kcal) via CaloriQ AI!',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: AppTheme.ink,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not estimate: $e'),
+          backgroundColor: AppTheme.coral,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isAiEstimating = false);
+      }
+    }
+  }
+
   void _saveMealLogs() {
     final mealProvider = Provider.of<MealProvider>(context, listen: false);
     for (final item in _loggedSessionItems) {
@@ -108,8 +159,20 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final foodDatabase = FoodData.defaultFoodDatabase;
-    final currentOptions = foodDatabase[_selectedTab] ?? [];
+    final userProvider = Provider.of<UserProfileProvider>(context);
+    final activeCuisine = _selectedCuisine ?? userProvider.cuisine;
+
+    List<FoodItem> currentOptions = [];
+    if (activeCuisine == 'All') {
+      for (final cuisineMap in FoodData.foodsByCuisine.values) {
+        if (cuisineMap.containsKey(_selectedTab)) {
+          currentOptions.addAll(cuisineMap[_selectedTab]!);
+        }
+      }
+    } else {
+      final db = FoodData.getFoodDatabaseForCuisine(activeCuisine);
+      currentOptions = db[_selectedTab] ?? [];
+    }
 
     // Search filter
     final filteredOptions = currentOptions.where((item) {
@@ -215,7 +278,142 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
                         }).toList(),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+
+                    // Cuisine Filter Pills Row
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildCuisineFilterChip(
+                            label: 'All Cuisines',
+                            flag: '🌍',
+                            isSelected: activeCuisine == 'All',
+                            onTap: () => setState(() => _selectedCuisine = 'All'),
+                            isDark: isDark,
+                          ),
+                          ...FoodData.supportedCuisines.map((c) {
+                            return _buildCuisineFilterChip(
+                              label: c,
+                              flag: FoodData.cuisineFlags[c] ?? '',
+                              isSelected: activeCuisine == c,
+                              onTap: () => setState(() => _selectedCuisine = c),
+                              isDark: isDark,
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // AI Camera Scanner Banner
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => AiFoodScannerScreen(
+                              targetMealType: _selectedTab,
+                            ),
+                          ),
+                        );
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 13,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isDark
+                                ? const [Color(0xFF22281B), Color(0xFF191D14)]
+                                : const [Color(0xFFF1FBE5), Color(0xFFE5F7D0)],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppTheme.lime.withValues(
+                              alpha: isDark ? 0.35 : 0.6,
+                            ),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.lime,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt_rounded,
+                                color: AppTheme.ink,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'AI Food Camera Scanner',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 13,
+                                          color: isDark ? Colors.white : AppTheme.ink,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.lime,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: const Text(
+                                          'NEW',
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w900,
+                                            color: AppTheme.ink,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Snap plate to detect calories, portion & volume swaps',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark
+                                          ? const Color(0xFFB0B8A6)
+                                          : const Color(0xFF5E6D4E),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 13,
+                              color: AppTheme.lime,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
 
                     // 3. SEARCH BAR
                     TextField(
@@ -232,6 +430,21 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
                       ),
                       decoration: InputDecoration(
                         hintText: 'Search rice, dal, hilsa…',
+                        suffixIcon: IconButton(
+                          icon: const Icon(
+                            Icons.camera_alt_rounded,
+                            color: AppTheme.lime,
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => AiFoodScannerScreen(
+                                  targetMealType: _selectedTab,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                         hintStyle: TextStyle(
                           color: Theme.of(context).hintColor,
                           fontSize: 14,
@@ -252,57 +465,197 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
                     const SizedBox(height: 20),
 
                     // 4. "QUICK PORTIONS" SECTION
-                    Text(
-                      'Quick portions',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: filteredOptions.map((food) {
-                        return GestureDetector(
-                          onTap: () => _addFoodItem(food),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Quick portions',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).hintColor,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _showAddCustomFoodDialog(context),
                           behavior: HitTestBehavior.opaque,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
+                              horizontal: 10,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? const Color(0xFF1A1A21)
-                                  : AppTheme.card,
-                              borderRadius: BorderRadius.circular(99),
-                            ),
-                            child: RichText(
-                              text: TextSpan(
-                                style: TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : AppTheme.ink,
-                                ),
-                                children: [
-                                  TextSpan(text: '+ ${food.name} '),
-                                  TextSpan(
-                                    text: '${food.kcal}',
-                                    style: TextStyle(
-                                      color: Theme.of(context).hintColor,
-                                    ),
-                                  ),
-                                ],
+                                  ? const Color(0xFF222B1A)
+                                  : const Color(0xFFF1FBE5),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppTheme.lime
+                                    .withValues(alpha: isDark ? 0.4 : 0.7),
+                                width: 1,
                               ),
                             ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.add_rounded,
+                                  size: 14,
+                                  color: AppTheme.lime,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Custom food',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? AppTheme.lime
+                                        : const Color(0xFF38690D),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 10),
+
+                    if (filteredOptions.isNotEmpty)
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: filteredOptions.map((food) {
+                          final flag = FoodData.cuisineFlags[food.cuisine] ?? '';
+                          return GestureDetector(
+                            onTap: () => _addFoodItem(food),
+                            behavior: HitTestBehavior.opaque,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF1A1A21)
+                                    : AppTheme.card,
+                                borderRadius: BorderRadius.circular(99),
+                              ),
+                              child: RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    fontFamily: 'Plus Jakarta Sans',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.white : AppTheme.ink,
+                                  ),
+                                  children: [
+                                    if (activeCuisine == 'All' && flag.isNotEmpty)
+                                      TextSpan(text: '$flag '),
+                                    TextSpan(text: '+ ${food.name} '),
+                                    TextSpan(
+                                      text: '${food.kcal}',
+                                      style: TextStyle(
+                                        color: Theme.of(context).hintColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    else if (_searchQuery.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF1F1F2A)
+                              : const Color(0xFFF7F6F1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF2E2E3E)
+                                : const Color(0xFFE4E1D8),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Not in local list',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? Colors.white : AppTheme.ink,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'CaloriQ AI can estimate macros and calories for "$_searchQuery" instantly.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            GestureDetector(
+                              onTap: _isAiEstimating
+                                  ? null
+                                  : () => _estimateWithAi(
+                                        _searchQuery,
+                                        activeCuisine == 'All'
+                                            ? userProvider.cuisine
+                                            : activeCuisine,
+                                      ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.lime,
+                                  borderRadius: BorderRadius.circular(99),
+                                ),
+                                child: _isAiEstimating
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            AppTheme.ink,
+                                          ),
+                                        ),
+                                      )
+                                    : const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.auto_awesome,
+                                            size: 14,
+                                            color: AppTheme.ink,
+                                          ),
+                                          SizedBox(width: 6),
+                                          Text(
+                                            'Estimate with CaloriQ AI',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w800,
+                                              color: AppTheme.ink,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     const SizedBox(height: 20),
 
                     // 5. MEAL SUMMARY CARD
@@ -502,6 +855,242 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCuisineFilterChip({
+    required String label,
+    required String flag,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? (isDark ? AppTheme.lime : AppTheme.ink)
+                : (isDark ? const Color(0xFF1E1E26) : const Color(0xFFF4F3EE)),
+            borderRadius: BorderRadius.circular(99),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? AppTheme.lime : AppTheme.ink)
+                  : (isDark ? const Color(0xFF2B2B36) : const Color(0xFFE4E1D8)),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (flag.isNotEmpty) ...[
+                GlassyBadge.flag(flag, size: 20, fontSize: 12),
+                const SizedBox(width: 7),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  color: isSelected
+                      ? (isDark ? AppTheme.ink : Colors.white)
+                      : (isDark ? const Color(0xFFB5B5C2) : const Color(0xFF5A5A66)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddCustomFoodDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final nameCtrl = TextEditingController();
+    final kcalCtrl = TextEditingController();
+    final carbsCtrl = TextEditingController();
+    final proteinCtrl = TextEditingController();
+    final fatCtrl = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? const Color(0xFF191924) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white24 : Colors.black12,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Add Custom Food',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Quickly log homemade recipes or unlisted items',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Name input
+                TextField(
+                  controller: nameCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Food Name (e.g. Homemade Khichuri)',
+                    filled: true,
+                    fillColor: isDark
+                        ? const Color(0xFF22222E)
+                        : const Color(0xFFF7F6F2),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Calories input
+                TextField(
+                  controller: kcalCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Calories (kcal)',
+                    filled: true,
+                    fillColor: isDark
+                        ? const Color(0xFF22222E)
+                        : const Color(0xFFF7F6F2),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Macros row
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: carbsCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Carbs (g)',
+                          filled: true,
+                          fillColor: isDark
+                              ? const Color(0xFF22222E)
+                              : const Color(0xFFF7F6F2),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: proteinCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Protein (g)',
+                          filled: true,
+                          fillColor: isDark
+                              ? const Color(0xFF22222E)
+                              : const Color(0xFFF7F6F2),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: fatCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Fat (g)',
+                          filled: true,
+                          fillColor: isDark
+                              ? const Color(0xFF22222E)
+                              : const Color(0xFFF7F6F2),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                CustomButton(
+                  text: 'Add to $_selectedTab',
+                  onPressed: () {
+                    final name = nameCtrl.text.trim();
+                    final kcal = int.tryParse(kcalCtrl.text.trim()) ?? 0;
+                    if (name.isEmpty || kcal <= 0) return;
+
+                    final carbs = double.tryParse(carbsCtrl.text.trim()) ?? 0.0;
+                    final protein =
+                        double.tryParse(proteinCtrl.text.trim()) ?? 0.0;
+                    final fat = double.tryParse(fatCtrl.text.trim()) ?? 0.0;
+
+                    final customItem = FoodItem(
+                      name: name,
+                      kcal: kcal,
+                      carbs: carbs,
+                      protein: protein,
+                      fat: fat,
+                      mealType: _selectedTab,
+                    );
+
+                    _addFoodItem(customItem);
+                    Navigator.of(ctx).pop();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

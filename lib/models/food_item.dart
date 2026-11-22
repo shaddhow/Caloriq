@@ -8,6 +8,7 @@ class FoodItem {
   final double carbs; // in grams
   final double fat; // in grams
   final String? mealType; // 'Breakfast', 'Lunch', 'Snacks', 'Dinner'
+  final String cuisine; // 'Bangladeshi', 'Indian', 'Western', 'Middle Eastern'
 
   FoodItem({
     String? id,
@@ -17,6 +18,7 @@ class FoodItem {
     required this.carbs,
     required this.fat,
     this.mealType,
+    this.cuisine = 'Bangladeshi',
   }) : id = id ?? const Uuid().v4();
 
   FoodItem copyWith({
@@ -27,6 +29,7 @@ class FoodItem {
     double? carbs,
     double? fat,
     String? mealType,
+    String? cuisine,
   }) {
     return FoodItem(
       id: id ?? this.id,
@@ -36,6 +39,7 @@ class FoodItem {
       carbs: carbs ?? this.carbs,
       fat: fat ?? this.fat,
       mealType: mealType ?? this.mealType,
+      cuisine: cuisine ?? this.cuisine,
     );
   }
 
@@ -48,6 +52,7 @@ class FoodItem {
       'carbs': carbs,
       'fat': fat,
       'mealType': mealType,
+      'cuisine': cuisine,
     };
   }
 
@@ -60,6 +65,7 @@ class FoodItem {
       carbs: (map['carbs'] as num?)?.toDouble() ?? 0.0,
       fat: (map['fat'] as num?)?.toDouble() ?? 0.0,
       mealType: map['mealType'] as String?,
+      cuisine: map['cuisine'] as String? ?? 'Bangladeshi',
     );
   }
 }
