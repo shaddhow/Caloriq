@@ -6,6 +6,7 @@ class UserProfile {
   final String activityLevel; // 'Light', 'Moderate', 'Active'
   final String goal; // 'Lose fat', 'Maintain', 'Build muscle'
   final String pace; // 'Mild', 'Moderate', 'Intense', 'Extreme'
+  final String cuisine; // 'Bangladeshi', 'Indian', 'Western', 'Middle Eastern'
 
   const UserProfile({
     this.gender = 'Male',
@@ -15,6 +16,7 @@ class UserProfile {
     this.activityLevel = 'Moderate',
     this.goal = 'Lose fat',
     this.pace = 'Moderate',
+    this.cuisine = 'Bangladeshi',
   });
 
   UserProfile copyWith({
@@ -25,6 +27,7 @@ class UserProfile {
     String? activityLevel,
     String? goal,
     String? pace,
+    String? cuisine,
   }) {
     return UserProfile(
       gender: gender ?? this.gender,
@@ -34,6 +37,7 @@ class UserProfile {
       activityLevel: activityLevel ?? this.activityLevel,
       goal: goal ?? this.goal,
       pace: pace ?? this.pace,
+      cuisine: cuisine ?? this.cuisine,
     );
   }
 
@@ -46,6 +50,7 @@ class UserProfile {
       'activityLevel': activityLevel,
       'goal': goal,
       'pace': pace,
+      'cuisine': cuisine,
     };
   }
 
@@ -58,6 +63,7 @@ class UserProfile {
       activityLevel: map['activityLevel'] as String? ?? 'Moderate',
       goal: map['goal'] as String? ?? 'Lose fat',
       pace: map['pace'] as String? ?? 'Moderate',
+      cuisine: map['cuisine'] as String? ?? 'Bangladeshi',
     );
   }
 }

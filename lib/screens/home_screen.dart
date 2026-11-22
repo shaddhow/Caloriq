@@ -5,6 +5,7 @@ import '../models/food_item.dart';
 import '../providers/meal_log_provider.dart';
 import '../providers/user_profile_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/food_data.dart';
 import '../widgets/caloriq_logo.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_card.dart';
@@ -24,7 +25,7 @@ class HomeScreen extends StatelessWidget {
     final burned = mealProvider.caloriesBurned;
     final budget = metrics.budget;
 
-    final suggestion = _MealSuggestion.fromCurrentTime();
+    final suggestion = _MealSuggestion.fromCurrentTime(userProvider.cuisine);
 
     return Scaffold(
       body: SafeArea(
@@ -482,7 +483,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'EAT NEXT · ${suggestion.mealType.toUpperCase()}',
+                                'EAT NEXT · ${suggestion.mealType.toUpperCase()} ${FoodData.cuisineFlags[suggestion.cuisine] ?? ''}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 11,
@@ -1189,40 +1190,39 @@ class _MealSuggestion {
   final String mealType;
   final String title;
   final String subtitle;
+  final String cuisine;
 
   const _MealSuggestion({
     required this.mealType,
     required this.title,
     required this.subtitle,
+    required this.cuisine,
   });
 
-  factory _MealSuggestion.fromCurrentTime() {
+  factory _MealSuggestion.fromCurrentTime(String cuisine) {
     final hour = DateTime.now().hour;
+    String mealType;
     if (hour < 11) {
-      return const _MealSuggestion(
-        mealType: 'Breakfast',
-        title: 'Greek yogurt, oats & banana',
-        subtitle: '320 kcal · 22g protein',
-      );
+      mealType = 'Breakfast';
     } else if (hour < 16) {
-      return const _MealSuggestion(
-        mealType: 'Lunch',
-        title: 'Rice, dal & grilled fish',
-        subtitle: '560 kcal · 34g protein',
-      );
+      mealType = 'Lunch';
     } else if (hour < 19) {
-      return const _MealSuggestion(
-        mealType: 'Snacks',
-        title: 'Roasted chickpeas & tea',
-        subtitle: '150 kcal · 8g protein',
-      );
+      mealType = 'Snacks';
     } else {
-      return const _MealSuggestion(
-        mealType: 'Dinner',
-        title: '2 Ruti, veg bhaji & chicken',
-        subtitle: '480 kcal · 36g protein',
-      );
+      mealType = 'Dinner';
     }
+
+    final data = FoodData.getSuggestion(
+      mealType: mealType,
+      cuisine: cuisine,
+    );
+
+    return _MealSuggestion(
+      mealType: mealType,
+      title: data.title,
+      subtitle: data.subtitle,
+      cuisine: cuisine,
+    );
   }
 }
 

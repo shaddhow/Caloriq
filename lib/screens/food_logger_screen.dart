@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/food_item.dart';
 import '../providers/meal_provider.dart';
+import '../providers/user_profile_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/food_data.dart';
 import '../widgets/custom_button.dart';
@@ -18,6 +19,7 @@ class FoodLoggerScreen extends StatefulWidget {
 
 class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
   late String _selectedTab;
+  String? _selectedCuisine;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -108,8 +110,20 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final foodDatabase = FoodData.defaultFoodDatabase;
-    final currentOptions = foodDatabase[_selectedTab] ?? [];
+    final userProvider = Provider.of<UserProfileProvider>(context);
+    final activeCuisine = _selectedCuisine ?? userProvider.cuisine;
+
+    List<FoodItem> currentOptions = [];
+    if (activeCuisine == 'All') {
+      for (final cuisineMap in FoodData.foodsByCuisine.values) {
+        if (cuisineMap.containsKey(_selectedTab)) {
+          currentOptions.addAll(cuisineMap[_selectedTab]!);
+        }
+      }
+    } else {
+      final db = FoodData.getFoodDatabaseForCuisine(activeCuisine);
+      currentOptions = db[_selectedTab] ?? [];
+    }
 
     // Search filter
     final filteredOptions = currentOptions.where((item) {
@@ -215,7 +229,34 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
                         }).toList(),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+
+                    // Cuisine Filter Pills Row
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildCuisineFilterChip(
+                            label: 'All Cuisines',
+                            flag: '🌍',
+                            isSelected: activeCuisine == 'All',
+                            onTap: () => setState(() => _selectedCuisine = 'All'),
+                            isDark: isDark,
+                          ),
+                          ...FoodData.supportedCuisines.map((c) {
+                            return _buildCuisineFilterChip(
+                              label: c,
+                              flag: FoodData.cuisineFlags[c] ?? '',
+                              isSelected: activeCuisine == c,
+                              onTap: () => setState(() => _selectedCuisine = c),
+                              isDark: isDark,
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
 
                     // 3. SEARCH BAR
                     TextField(
@@ -266,6 +307,7 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
                       spacing: 8,
                       runSpacing: 8,
                       children: filteredOptions.map((food) {
+                        final flag = FoodData.cuisineFlags[food.cuisine] ?? '';
                         return GestureDetector(
                           onTap: () => _addFoodItem(food),
                           behavior: HitTestBehavior.opaque,
@@ -289,6 +331,8 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
                                   color: isDark ? Colors.white : AppTheme.ink,
                                 ),
                                 children: [
+                                  if (activeCuisine == 'All' && flag.isNotEmpty)
+                                    TextSpan(text: '$flag '),
                                   TextSpan(text: '+ ${food.name} '),
                                   TextSpan(
                                     text: '${food.kcal}',
@@ -502,6 +546,57 @@ class _FoodLoggerScreenState extends State<FoodLoggerScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCuisineFilterChip({
+    required String label,
+    required String flag,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? (isDark ? AppTheme.lime : AppTheme.ink)
+                : (isDark ? const Color(0xFF1E1E26) : const Color(0xFFF4F3EE)),
+            borderRadius: BorderRadius.circular(99),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? AppTheme.lime : AppTheme.ink)
+                  : (isDark ? const Color(0xFF2B2B36) : const Color(0xFFE4E1D8)),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (flag.isNotEmpty) ...[
+                Text(flag, style: const TextStyle(fontSize: 13)),
+                const SizedBox(width: 5),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  color: isSelected
+                      ? (isDark ? AppTheme.ink : Colors.white)
+                      : (isDark ? const Color(0xFFB5B5C2) : const Color(0xFF5A5A66)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

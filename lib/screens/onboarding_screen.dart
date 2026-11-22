@@ -27,6 +27,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String? _activityLevel;
   String? _goal;
   String? _pace;
+  String _cuisine = 'Bangladeshi';
 
   // Height unit state
   String _heightUnit = 'ft'; // 'ft' (Feet & Inches) or 'm' (Meters)
@@ -49,6 +50,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (p.activityLevel.isNotEmpty) _activityLevel = p.activityLevel;
       if (p.goal.isNotEmpty) _goal = p.goal;
       if (p.pace.isNotEmpty) _pace = p.pace;
+      if (p.cuisine.isNotEmpty) _cuisine = p.cuisine;
       _heightSet = true;
     }
     _syncHeightFromCm(_height);
@@ -97,6 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         activityLevel: _activityLevel ?? 'Moderate',
         goal: _goal ?? 'Lose fat',
         pace: _pace ?? 'Moderate',
+        cuisine: _cuisine,
       );
 
   void _onPaceSelected(String newPace) {
@@ -344,7 +347,134 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           max: 80,
           onChanged: (val) => setState(() => _age = val.round()),
         ),
+        const SizedBox(height: 16),
+
+        _buildCuisinePickerCard(),
       ],
+    );
+  }
+
+  Widget _buildCuisinePickerCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cuisines = [
+      {'name': 'Bangladeshi', 'flag': '🇧🇩', 'desc': 'Ruti, Bhat, Dal, Fish'},
+      {'name': 'Indian', 'flag': '🇮🇳', 'desc': 'Idli, Dosa, Chapati, Paneer'},
+      {'name': 'Western', 'flag': '🇺🇸', 'desc': 'Oats, Eggs, Salmon, Salad'},
+      {'name': 'Middle Eastern', 'flag': '🇦🇪', 'desc': 'Shakshuka, Hummus, Shawarma'},
+    ];
+
+    return CustomCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Regional Diet & Cuisine',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).hintColor,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF262633) : const Color(0xFFF1EFEA),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Tailors suggestions',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? const Color(0xFFB0B0BE) : const Color(0xFF6E6E7C),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Column(
+            children: cuisines.map((item) {
+              final isSelected = _cuisine == item['name'];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _cuisine = item['name']!;
+                    });
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? (isDark ? AppTheme.lime.withValues(alpha: 0.15) : const Color(0xFFF2F9E8))
+                          : (isDark ? const Color(0xFF1E1E26) : const Color(0xFFF8F7F3)),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppTheme.lime
+                            : (isDark ? const Color(0xFF2E2E3A) : const Color(0xFFECE9E2)),
+                        width: isSelected ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          item['flag']!,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item['name']!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? Colors.white : AppTheme.ink,
+                                ),
+                              ),
+                              Text(
+                                item['desc']!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (isSelected)
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.lime,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              size: 14,
+                              color: AppTheme.ink,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 

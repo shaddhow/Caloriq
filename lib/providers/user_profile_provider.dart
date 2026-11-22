@@ -15,6 +15,7 @@ class UserProfileProvider extends ChangeNotifier {
   UserProfile get profile => _profile;
   bool get isOnboarded => _isOnboarded;
   bool get isLoading => _isLoading;
+  String get cuisine => _profile.cuisine;
 
   // Metric calculation getters
   ProfileMetrics get metrics => ProfileMetrics.fromProfile(_profile);
@@ -59,6 +60,11 @@ class UserProfileProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error saving user profile: $e');
     }
+  }
+
+  Future<void> setCuisine(String newCuisine) async {
+    if (_profile.cuisine == newCuisine) return;
+    await saveUserProfile(_profile.copyWith(cuisine: newCuisine));
   }
 
   Future<void> resetOnboarding() async {
