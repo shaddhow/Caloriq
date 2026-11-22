@@ -9,6 +9,8 @@ import '../utils/food_data.dart';
 import '../widgets/caloriq_logo.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_card.dart';
+import '../widgets/glassy_badge.dart';
+import 'ai_food_scanner_screen.dart';
 import 'food_logger_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -25,7 +27,11 @@ class HomeScreen extends StatelessWidget {
     final burned = mealProvider.caloriesBurned;
     final budget = metrics.budget;
 
-    final suggestion = _MealSuggestion.fromCurrentTime(userProvider.cuisine);
+    final suggestion = _MealSuggestion.determineNextMeal(
+      mealProvider: mealProvider,
+      cuisine: userProvider.cuisine,
+      budget: budget,
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -67,33 +73,44 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
 
-                  // Streak Pill
+                  // Luxury Glass Streak Pill
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 9,
+                      horizontal: 10,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1A1A21) : AppTheme.card,
+                      color: isDark ? const Color(0xFF1E1E28) : Colors.white,
                       borderRadius: BorderRadius.circular(99),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF2C2C3A)
+                            : const Color(0xFFEBE8E1),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF6B4A).withValues(alpha: isDark ? 0.2 : 0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.local_fire_department,
-                          size: 18,
-                          color: AppTheme.coral,
-                        ),
-                        const SizedBox(width: 6),
+                        GlassyBadge.flame(size: 24),
+                        const SizedBox(width: 8),
                         Text(
                           '${mealProvider.streakDays} days',
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
                             color: isDark ? Colors.white : AppTheme.ink,
                           ),
                         ),
+                        const SizedBox(width: 4),
                       ],
                     ),
                   ),
@@ -402,13 +419,59 @@ class HomeScreen extends StatelessWidget {
                       letterSpacing: -0.4,
                     ),
                   ),
-                  Text(
-                    '${mealProvider.loggedToday.length} items logged',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).hintColor,
-                    ),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const AiFoodScannerScreen(),
+                            ),
+                          );
+                        },
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppTheme.lime.withValues(alpha: 0.18)
+                                : AppTheme.lime,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.camera_alt_rounded,
+                                size: 14,
+                                color: isDark ? AppTheme.lime : AppTheme.ink,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'AI Scan',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11,
+                                  color: isDark ? AppTheme.lime : AppTheme.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '${mealProvider.loggedToday.length} items logged',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).hintColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -477,13 +540,15 @@ class HomeScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.restaurant_menu_rounded,
+                                suggestion.isAllCompleted
+                                    ? Icons.nightlight_round
+                                    : Icons.eco_rounded,
                                 size: 14,
                                 color: isDark ? AppTheme.lime : AppTheme.ink,
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'EAT NEXT · ${suggestion.mealType.toUpperCase()} ${FoodData.cuisineFlags[suggestion.cuisine] ?? ''}',
+                                suggestion.tag,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 11,
@@ -491,9 +556,43 @@ class HomeScreen extends StatelessWidget {
                                   color: isDark ? AppTheme.lime : AppTheme.ink,
                                 ),
                               ),
+                              if (FoodData.cuisineFlags[suggestion.cuisine] != null &&
+                                  !suggestion.isAllCompleted) ...[
+                                const SizedBox(width: 6),
+                                GlassyBadge.flag(
+                                  FoodData.cuisineFlags[suggestion.cuisine]!,
+                                  size: 20,
+                                  fontSize: 12,
+                                ),
+                              ],
                             ],
                           ),
                         ),
+                        if (!suggestion.isAllCompleted && suggestion.remainingBudget > 0) ...[
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF262635)
+                                  : const Color(0xFFF1EFE8),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${suggestion.remainingBudget} kcal left',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: isDark
+                                    ? const Color(0xFFD4FF66)
+                                    : const Color(0xFF38690D),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -515,15 +614,96 @@ class HomeScreen extends StatelessWidget {
                         color: Theme.of(context).hintColor,
                       ),
                     ),
+                    if (suggestion.swapTip.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF222B1B)
+                              : const Color(0xFFF3FAEC),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppTheme.lime.withValues(
+                              alpha: isDark ? 0.35 : 0.65,
+                            ),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.swap_horizontal_circle_outlined,
+                                  color: AppTheme.lime,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'VOLUME HACK · EAT MORE, WEIGH LESS',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 11,
+                                    letterSpacing: 0.4,
+                                    color: isDark
+                                        ? AppTheme.lime
+                                        : const Color(0xFF38690D),
+                                  ),
+                                ),
+                                const Spacer(),
+                                if (suggestion.savingsKcal > 0)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.lime,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      '-${suggestion.savingsKcal} kcal',
+                                      style: const TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppTheme.ink,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              suggestion.swapTip,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: isDark
+                                    ? const Color(0xFFD6D6DE)
+                                    : const Color(0xFF4A5538),
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     CustomButton(
-                      text: 'Log meal',
+                      text: suggestion.isAllCompleted
+                          ? 'Log extra food'
+                          : 'Log ${suggestion.mealType.toLowerCase()}',
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => FoodLoggerScreen(
-                              initialMealType: suggestion.mealType,
+                              initialMealType: suggestion.isAllCompleted
+                                  ? 'Snacks'
+                                  : suggestion.mealType,
                             ),
                           ),
                         );
@@ -644,7 +824,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Water Tracker Card
+  // Water Tracker Card (Ultra-Premium Glassy Bento)
   static Widget _buildWaterCard(
     BuildContext context,
     MealLogProvider mealProvider,
@@ -656,8 +836,19 @@ class HomeScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2830) : const Color(0xFFEBF5FA),
+        color: isDark ? const Color(0xFF161C26) : Colors.white,
         borderRadius: AppTheme.cardsBorderRadius,
+        border: Border.all(
+          color: isDark ? const Color(0xFF222C3D) : const Color(0xFFE5EEF5),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0288D1).withValues(alpha: isDark ? 0.15 : 0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -668,15 +859,20 @@ class HomeScreen extends StatelessWidget {
               Text(
                 'Water',
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   fontSize: 13,
                   color: isDark ? Colors.white : AppTheme.ink,
                 ),
               ),
-              const Icon(
-                Icons.water_drop_rounded,
-                size: 20,
-                color: Color(0xFF1E88E5),
+              GlassyBadge(
+                size: 28,
+                borderRadius: 8,
+                glowColor: const Color(0xFF0288D1).withValues(alpha: 0.3),
+                child: const Icon(
+                  Icons.water_drop_rounded,
+                  size: 16,
+                  color: Color(0xFF29B6F6),
+                ),
               ),
             ],
           ),
@@ -728,15 +924,17 @@ class HomeScreen extends StatelessWidget {
                   height: 5,
                   width: double.infinity,
                   color: isDark
-                      ? const Color(0xFF2A3642)
-                      : const Color(0xFFD6E9F5),
+                      ? const Color(0xFF232D3B)
+                      : const Color(0xFFE3EDF5),
                 ),
                 FractionallySizedBox(
                   widthFactor: waterRatio,
                   child: Container(
                     height: 5,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E88E5),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0288D1), Color(0xFF29B6F6)],
+                      ),
                       borderRadius: BorderRadius.circular(99),
                     ),
                   ),
@@ -755,11 +953,21 @@ class HomeScreen extends StatelessWidget {
                     HapticFeedback.lightImpact();
                     mealProvider.addWater(250);
                   },
+                  behavior: HitTestBehavior.opaque,
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E88E5),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0288D1), Color(0xFF039BE5)],
+                      ),
                       borderRadius: BorderRadius.circular(99),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0288D1).withValues(alpha: 0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: const Center(
                       child: Text(
@@ -781,12 +989,13 @@ class HomeScreen extends StatelessWidget {
                     HapticFeedback.lightImpact();
                     mealProvider.removeWater(250);
                   },
+                  behavior: HitTestBehavior.opaque,
                   child: Container(
                     padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? const Color(0xFF2A3642)
-                          : const Color(0xFFD6E9F5),
+                          ? const Color(0xFF232D3B)
+                          : const Color(0xFFE8EEF4),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -804,7 +1013,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Daily Weigh-in Card
+  // Daily Weigh-in Card (Ultra-Premium Glassy Bento)
   static Widget _buildWeightCard(
     BuildContext context,
     UserProfileProvider userProvider,
@@ -822,11 +1031,23 @@ class HomeScreen extends StatelessWidget {
         mealProvider,
         currentWeight,
       ),
+      behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF28201D) : const Color(0xFFFFF2EB),
+          color: isDark ? const Color(0xFF221A16) : Colors.white,
           borderRadius: AppTheme.cardsBorderRadius,
+          border: Border.all(
+            color: isDark ? const Color(0xFF38261F) : const Color(0xFFF7EBE4),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFE67E42).withValues(alpha: isDark ? 0.15 : 0.05),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -837,15 +1058,20 @@ class HomeScreen extends StatelessWidget {
                 Text(
                   'Weight',
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: isDark ? Colors.white : AppTheme.ink,
                   ),
                 ),
-                const Icon(
-                  Icons.monitor_weight_outlined,
-                  size: 20,
-                  color: Color(0xFFE67E42),
+                GlassyBadge(
+                  size: 28,
+                  borderRadius: 8,
+                  glowColor: const Color(0xFFE67E42).withValues(alpha: 0.3),
+                  child: const Icon(
+                    Icons.monitor_weight_outlined,
+                    size: 16,
+                    color: Color(0xFFE67E42),
+                  ),
                 ),
               ],
             ),
@@ -893,7 +1119,9 @@ class HomeScreen extends StatelessWidget {
               height: 5,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFFE67E42).withValues(alpha: 0.3),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE67E42), Color(0xFFFF9E6B)],
+                ),
                 borderRadius: BorderRadius.circular(99),
               ),
             ),
@@ -903,8 +1131,17 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFE67E42),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE67E42), Color(0xFFF18C52)],
+                ),
                 borderRadius: BorderRadius.circular(99),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFE67E42).withValues(alpha: 0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: const Center(
                 child: Row(
@@ -1187,29 +1424,74 @@ class HomeScreen extends StatelessWidget {
 
 // Meal Suggestion Helper
 class _MealSuggestion {
+  final String tag;
   final String mealType;
   final String title;
   final String subtitle;
   final String cuisine;
+  final String swapTip;
+  final int savingsKcal;
+  final int remainingBudget;
+  final bool isAllCompleted;
 
   const _MealSuggestion({
+    required this.tag,
     required this.mealType,
     required this.title,
     required this.subtitle,
     required this.cuisine,
+    required this.swapTip,
+    this.savingsKcal = 0,
+    this.remainingBudget = 0,
+    this.isAllCompleted = false,
   });
 
-  factory _MealSuggestion.fromCurrentTime(String cuisine) {
+  factory _MealSuggestion.determineNextMeal({
+    required MealLogProvider mealProvider,
+    required String cuisine,
+    required int budget,
+  }) {
+    final hasBreakfast = mealProvider.getCaloriesForMeal('Breakfast') > 0 ||
+        mealProvider.getItemsForMeal('Breakfast').isNotEmpty;
+    final hasLunch = mealProvider.getCaloriesForMeal('Lunch') > 0 ||
+        mealProvider.getItemsForMeal('Lunch').isNotEmpty;
+    final hasSnacks = mealProvider.getCaloriesForMeal('Snacks') > 0 ||
+        mealProvider.getItemsForMeal('Snacks').isNotEmpty;
+    final hasDinner = mealProvider.getCaloriesForMeal('Dinner') > 0 ||
+        mealProvider.getItemsForMeal('Dinner').isNotEmpty;
+
     final hour = DateTime.now().hour;
+    final remainingBudget = (budget - mealProvider.totalKcal).clamp(0, 9999);
+
     String mealType;
-    if (hour < 11) {
+    String tag;
+    bool isAllCompleted = false;
+
+    if (!hasBreakfast && hour < 11) {
       mealType = 'Breakfast';
-    } else if (hour < 16) {
+      tag = 'HEALTHY CHOICE · BREAKFAST';
+    } else if (!hasLunch && (hasBreakfast || hour >= 11) && hour < 16) {
       mealType = 'Lunch';
-    } else if (hour < 19) {
+      tag = 'UP NEXT · LUNCH';
+    } else if (!hasSnacks && (hasLunch || hour >= 16) && hour < 19) {
       mealType = 'Snacks';
-    } else {
+      tag = 'UP NEXT · SNACKS';
+    } else if (!hasDinner) {
       mealType = 'Dinner';
+      tag = 'UP NEXT · DINNER';
+    } else if (!hasSnacks) {
+      mealType = 'Snacks';
+      tag = 'HEALTHY CHOICE · SNACKS';
+    } else if (!hasLunch) {
+      mealType = 'Lunch';
+      tag = 'HEALTHY CHOICE · LUNCH';
+    } else if (!hasBreakfast) {
+      mealType = 'Breakfast';
+      tag = 'HEALTHY CHOICE · BREAKFAST';
+    } else {
+      mealType = 'Recovery';
+      tag = 'ALL MEALS LOGGED · REST & HYDRATION';
+      isAllCompleted = true;
     }
 
     final data = FoodData.getSuggestion(
@@ -1218,10 +1500,15 @@ class _MealSuggestion {
     );
 
     return _MealSuggestion(
+      tag: tag,
       mealType: mealType,
       title: data.title,
       subtitle: data.subtitle,
       cuisine: cuisine,
+      swapTip: data.swapTip,
+      savingsKcal: data.savingsKcal,
+      remainingBudget: remainingBudget,
+      isAllCompleted: isAllCompleted,
     );
   }
 }

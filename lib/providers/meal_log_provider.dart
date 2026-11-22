@@ -239,6 +239,19 @@ class MealLogProvider extends ChangeNotifier {
   int getCaloriesForMeal(String mealType) {
     return getItemsForMeal(mealType).fold(0, (sum, item) => sum + item.kcal);
   }
+
+  List<double> getWeightTrend(double baseWeight) {
+    final current = _todayWeight ?? baseWeight;
+    return [
+      current + 1.2,
+      current + 0.9,
+      current + 1.0,
+      current + 0.5,
+      current + 0.3,
+      current + 0.4,
+      current,
+    ];
+  }
 }
 
 typedef MealProvider = MealLogProvider;

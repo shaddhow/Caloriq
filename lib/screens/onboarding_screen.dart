@@ -6,6 +6,7 @@ import '../utils/app_theme.dart';
 import '../utils/calculators.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_card.dart';
+import '../widgets/glassy_badge.dart';
 import 'main_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -424,9 +425,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                     child: Row(
                       children: [
-                        Text(
+                        GlassyBadge.flag(
                           item['flag']!,
-                          style: const TextStyle(fontSize: 22),
+                          size: 34,
+                          fontSize: 20,
                         ),
                         const SizedBox(width: 12),
                         Expanded(

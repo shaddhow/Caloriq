@@ -1,9 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/meal_log_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/custom_card.dart';
+import '../widgets/glassy_badge.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -18,19 +20,22 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final mealProvider = Provider.of<MealLogProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final profile = userProvider.profile;
     final metrics = userProvider.metrics;
 
-    // Sample 7-day weight data & 3-day moving average from HTML spec
-    final rawWeights = [74.8, 74.5, 74.9, 74.3, 74.1, 74.2, 73.8];
+    // Dynamic 7-day weight trend centered around user's actual profile weight
+    final rawWeights = mealProvider.getWeightTrend(profile.weight);
     final movingAverages = List.generate(rawWeights.length, (i) {
       final subList = rawWeights.sublist(i >= 2 ? i - 2 : 0, i + 1);
       return subList.reduce((a, b) => a + b) / subList.length;
     });
 
     final currentAverageWeight = movingAverages.last;
+    final minWeight = rawWeights.reduce((a, b) => a < b ? a : b) - 1.0;
+    final maxWeight = rawWeights.reduce((a, b) => a > b ? a : b) + 1.0;
 
     return Scaffold(
       body: SafeArea(
@@ -167,8 +172,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               ),
                             ),
                           ),
-                          minY: 73.0,
-                          maxY: 75.2,
+                          minY: minWeight,
+                          maxY: maxWeight,
                           lineBarsData: [
                             LineChartBarData(
                               spots: List.generate(
@@ -218,47 +223,60 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ),
               const SizedBox(height: 12),
 
-              // 3. CHEAT DAY COMPENSATOR CARD (Peach)
-              CustomCard(
-                backgroundColor: AppTheme.peach,
+              // 3. CHEAT DAY COMPENSATOR CARD (Ultra-Luxury Telemetry)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF221715) : const Color(0xFFFFF4EE),
+                  borderRadius: AppTheme.cardsBorderRadius,
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF38231E) : const Color(0xFFFCDDCD),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B4A).withValues(alpha: isDark ? 0.15 : 0.06),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: const [
-                        Icon(
-                          Icons.local_fire_department,
-                          size: 18,
-                          color: AppTheme.ink,
-                        ),
-                        SizedBox(width: 8),
+                      children: [
+                        GlassyBadge.flame(size: 26),
+                        const SizedBox(width: 8),
                         Text(
                           'CHEAT DAY COMPENSATOR',
                           style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                            letterSpacing: 0.6,
-                            color: AppTheme.ink,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 11,
+                            letterSpacing: 0.8,
+                            color: isDark ? const Color(0xFFFF8B70) : const Color(0xFFD35400),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    const Text(
+                    const SizedBox(height: 12),
+                    Text(
                       '+800 kcal yesterday',
                       style: TextStyle(
                         fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.ink,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : AppTheme.ink,
+                        letterSpacing: -0.4,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Spread across the next 48 hours. No guilt, just math.',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xB314141A),
+                        color: isDark ? const Color(0xFFB8A6A2) : const Color(0xFF7A6A66),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -270,27 +288,33 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: const Color(0x99FFFFFF),
-                              borderRadius: BorderRadius.circular(20),
+                              color: isDark ? const Color(0xFF2C1E1B) : Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF3F2B26)
+                                    : const Color(0xFFF5E4DC),
+                                width: 1,
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Today',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xB314141A),
+                                    color: isDark ? const Color(0xFFA0908C) : const Color(0xFF8A7A76),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   '${metrics.budget - 400}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 26,
                                     fontWeight: FontWeight.w800,
-                                    color: AppTheme.ink,
+                                    color: isDark ? Colors.white : AppTheme.ink,
                                     height: 1.0,
                                   ),
                                 ),
@@ -303,27 +327,33 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: const Color(0x99FFFFFF),
-                              borderRadius: BorderRadius.circular(20),
+                              color: isDark ? const Color(0xFF2C1E1B) : Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF3F2B26)
+                                    : const Color(0xFFF5E4DC),
+                                width: 1,
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Tomorrow',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xB314141A),
+                                    color: isDark ? const Color(0xFFA0908C) : const Color(0xFF8A7A76),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   '${metrics.budget - 400}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 26,
                                     fontWeight: FontWeight.w800,
-                                    color: AppTheme.ink,
+                                    color: isDark ? Colors.white : AppTheme.ink,
                                     height: 1.0,
                                   ),
                                 ),

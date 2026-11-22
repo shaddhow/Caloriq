@@ -5,12 +5,16 @@ class FoodSuggestionData {
   final String subtitle;
   final int kcal;
   final int protein;
+  final String swapTip;
+  final int savingsKcal;
 
   const FoodSuggestionData({
     required this.title,
     required this.subtitle,
     required this.kcal,
     required this.protein,
+    required this.swapTip,
+    this.savingsKcal = 0,
   });
 }
 
@@ -40,39 +44,47 @@ class FoodData {
   static final Map<String, Map<String, List<FoodItem>>> foodsByCuisine = {
     'Bangladeshi': {
       'Breakfast': [
+        FoodItem(name: '2 Dim Sheddho (Boiled)', kcal: 140, carbs: 1, protein: 13, fat: 9, cuisine: 'Bangladeshi'),
         FoodItem(name: '2 Ruti', kcal: 200, carbs: 40, protein: 6, fat: 2, cuisine: 'Bangladeshi'),
-        FoodItem(name: '1 Dim Bhaji', kcal: 120, carbs: 1, protein: 7, fat: 9, cuisine: 'Bangladeshi'),
+        FoodItem(name: '1 Dim Sheddho', kcal: 70, carbs: 0.5, protein: 6.5, fat: 4.5, cuisine: 'Bangladeshi'),
         FoodItem(name: '1 Bowl Dal', kcal: 150, carbs: 20, protein: 9, fat: 4, cuisine: 'Bangladeshi'),
-        FoodItem(name: '1 Plate Bhat', kcal: 240, carbs: 52, protein: 4, fat: 1, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Mixed Sabji (Low Oil)', kcal: 85, carbs: 12, protein: 3, fat: 2, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Oats Khichuri', kcal: 260, carbs: 38, protein: 10, fat: 6, cuisine: 'Bangladeshi'),
+        FoodItem(name: '1 Dim Bhaji', kcal: 120, carbs: 1, protein: 7, fat: 9, cuisine: 'Bangladeshi'),
         FoodItem(name: '1 Paratha', kcal: 260, carbs: 32, protein: 5, fat: 12, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Rong Cha / Green Tea', kcal: 5, carbs: 1, protein: 0, fat: 0, cuisine: 'Bangladeshi'),
         FoodItem(name: '1 Cup Cha (Dudh-Chini)', kcal: 70, carbs: 10, protein: 2, fat: 2, cuisine: 'Bangladeshi'),
-        FoodItem(name: 'Khichuri with Egg', kcal: 380, carbs: 55, protein: 14, fat: 12, cuisine: 'Bangladeshi'),
       ],
       'Lunch': [
-        FoodItem(name: '1 Plate Bhat', kcal: 240, carbs: 52, protein: 4, fat: 1, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Half Plate Bhat', kcal: 130, carbs: 28, protein: 2, fat: 0.5, cuisine: 'Bangladeshi'),
         FoodItem(name: 'Chicken Curry', kcal: 210, carbs: 4, protein: 22, fat: 12, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Grilled Chicken (150g)', kcal: 220, carbs: 0, protein: 36, fat: 5, cuisine: 'Bangladeshi'),
         FoodItem(name: '1 Bowl Dal', kcal: 150, carbs: 20, protein: 9, fat: 4, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Cucumber & Tomato Salad', kcal: 35, carbs: 7, protein: 1, fat: 0, cuisine: 'Bangladeshi'),
         FoodItem(name: 'Veg Bhaji', kcal: 90, carbs: 10, protein: 3, fat: 4, cuisine: 'Bangladeshi'),
+        FoodItem(name: '1 Plate Bhat', kcal: 240, carbs: 52, protein: 4, fat: 1, cuisine: 'Bangladeshi'),
         FoodItem(name: 'Hilsa Fish Curry', kcal: 280, carbs: 3, protein: 24, fat: 18, cuisine: 'Bangladeshi'),
-        FoodItem(name: 'Beef Bhuna', kcal: 320, carbs: 2, protein: 26, fat: 22, cuisine: 'Bangladeshi'),
         FoodItem(name: 'Rui Fish Bhaja', kcal: 190, carbs: 2, protein: 22, fat: 10, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Beef Bhuna', kcal: 320, carbs: 2, protein: 26, fat: 22, cuisine: 'Bangladeshi'),
         FoodItem(name: 'Begun Bhorta', kcal: 85, carbs: 8, protein: 2, fat: 5, cuisine: 'Bangladeshi'),
       ],
       'Snacks': [
+        FoodItem(name: 'Boiled Chola & Shosa', kcal: 120, carbs: 18, protein: 6, fat: 2, cuisine: 'Bangladeshi'),
         FoodItem(name: '1 Banana', kcal: 105, carbs: 27, protein: 1, fat: 0, cuisine: 'Bangladeshi'),
-        FoodItem(name: 'Chanachur (50g)', kcal: 150, carbs: 14, protein: 4, fat: 9, cuisine: 'Bangladeshi'),
-        FoodItem(name: '1 Cup Cha', kcal: 70, carbs: 10, protein: 2, fat: 2, cuisine: 'Bangladeshi'),
-        FoodItem(name: '1 Singara', kcal: 180, carbs: 22, protein: 3, fat: 10, cuisine: 'Bangladeshi'),
-        FoodItem(name: '1 Samosa', kcal: 160, carbs: 19, protein: 3, fat: 9, cuisine: 'Bangladeshi'),
+        FoodItem(name: '1 Green Apple', kcal: 80, carbs: 20, protein: 0, fat: 0, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Muri with Chola', kcal: 110, carbs: 22, protein: 4, fat: 1, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Rong Cha / Green Tea', kcal: 5, carbs: 1, protein: 0, fat: 0, cuisine: 'Bangladeshi'),
         FoodItem(name: 'Jhalmuri (1 thonga)', kcal: 130, carbs: 22, protein: 3, fat: 4, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Chanachur (50g)', kcal: 150, carbs: 14, protein: 4, fat: 9, cuisine: 'Bangladeshi'),
+        FoodItem(name: '1 Singara', kcal: 180, carbs: 22, protein: 3, fat: 10, cuisine: 'Bangladeshi'),
       ],
       'Dinner': [
-        FoodItem(name: '2 Ruti', kcal: 200, carbs: 40, protein: 6, fat: 2, cuisine: 'Bangladeshi'),
-        FoodItem(name: 'Fish Curry', kcal: 180, carbs: 3, protein: 20, fat: 10, cuisine: 'Bangladeshi'),
+        FoodItem(name: '1-2 Lal Ruti', kcal: 160, carbs: 32, protein: 5, fat: 1, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Rui Fish Grilled/Curry', kcal: 180, carbs: 3, protein: 22, fat: 8, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Mixed Sabji', kcal: 85, carbs: 12, protein: 3, fat: 2, cuisine: 'Bangladeshi'),
         FoodItem(name: '1 Bowl Dal', kcal: 150, carbs: 20, protein: 9, fat: 4, cuisine: 'Bangladeshi'),
-        FoodItem(name: '1 Plate Bhat', kcal: 240, carbs: 52, protein: 4, fat: 1, cuisine: 'Bangladeshi'),
         FoodItem(name: 'Chicken Roast', kcal: 290, carbs: 6, protein: 28, fat: 16, cuisine: 'Bangladeshi'),
-        FoodItem(name: 'Mixed Sabji', kcal: 95, carbs: 12, protein: 3, fat: 4, cuisine: 'Bangladeshi'),
+        FoodItem(name: 'Half Plate Bhat', kcal: 130, carbs: 28, protein: 2, fat: 0.5, cuisine: 'Bangladeshi'),
       ],
     },
     'Indian': {
@@ -187,129 +199,197 @@ class FoodData {
       switch (mealType) {
         case 'Breakfast':
           return const FoodSuggestionData(
-            title: '2 Idli, Sambhar & Chutney',
-            subtitle: '240 kcal · 8g protein',
-            kcal: 240,
+            title: '2 Steamed Idli, Sambhar & Cucumber',
+            subtitle: '190 kcal · 8g protein · 0g oil',
+            swapTip: 'Swap fried poori or paratha for steamed idli & sambhar — saves 180 kcal of cooking oil!',
+            savingsKcal: 180,
+            kcal: 190,
             protein: 8,
           );
         case 'Lunch':
           return const FoodSuggestionData(
-            title: '2 Chapati, Dal Tadka & Paneer',
-            subtitle: '540 kcal · 26g protein',
-            kcal: 540,
-            protein: 26,
+            title: '2 Phulka, Dal Tadka & Cucumber Raita',
+            subtitle: '360 kcal · 18g protein · High fiber',
+            swapTip: 'Swap butter paneer for yellow dal & cucumber raita — maximizes volume while slashing saturated fat.',
+            savingsKcal: 160,
+            kcal: 360,
+            protein: 18,
           );
         case 'Snacks':
           return const FoodSuggestionData(
-            title: 'Roasted Makhana & Masala Chai',
-            subtitle: '190 kcal · 5g protein',
-            kcal: 190,
-            protein: 5,
+            title: 'Roasted Makhana & Spiced Black Tea',
+            subtitle: '110 kcal · 4g protein · 0g sugar',
+            swapTip: 'Swap fried snacks for roasted makhana — curbs cravings with 0g added sugar or trans fat.',
+            savingsKcal: 140,
+            kcal: 110,
+            protein: 4,
           );
         case 'Dinner':
+          return const FoodSuggestionData(
+            title: '2 Phulka, Palak Paneer & Mixed Salad',
+            subtitle: '340 kcal · 18g protein · Low carb',
+            swapTip: 'Swap heavy naan for 2 phulkas with palak paneer to keep carbs low before bedtime.',
+            savingsKcal: 150,
+            kcal: 340,
+            protein: 18,
+          );
+        case 'Recovery':
         default:
           return const FoodSuggestionData(
-            title: '2 Phulka, Dal Makhani & Raita',
-            subtitle: '480 kcal · 20g protein',
-            kcal: 480,
-            protein: 20,
+            title: 'Warm Jeera / Chamomile Water',
+            subtitle: '0 kcal · Rest & hydration mode',
+            swapTip: 'All meals completed! Hydrate with warm water to support metabolism and restful sleep.',
+            savingsKcal: 0,
+            kcal: 0,
+            protein: 0,
           );
       }
     } else if (c == 'Western') {
       switch (mealType) {
         case 'Breakfast':
           return const FoodSuggestionData(
-            title: 'Oatmeal, Greek yogurt & berries',
-            subtitle: '320 kcal · 22g protein',
-            kcal: 320,
-            protein: 22,
+            title: 'Oatmeal, 2 Boiled Egg Whites & Berries',
+            subtitle: '240 kcal · 16g protein · 0g oil',
+            swapTip: 'Swap sugary pancakes for oats & egg whites — sustained energy with zero blood sugar crash!',
+            savingsKcal: 220,
+            kcal: 240,
+            protein: 16,
           );
         case 'Lunch':
           return const FoodSuggestionData(
-            title: 'Grilled chicken breast & quinoa',
-            subtitle: '460 kcal · 44g protein',
-            kcal: 460,
-            protein: 44,
+            title: 'Grilled Chicken Breast & Big Greens Salad',
+            subtitle: '360 kcal · 42g protein · Lean meal',
+            swapTip: 'Swap heavy mayonnaise for olive oil & lemon on a massive bed of fresh greens.',
+            savingsKcal: 180,
+            kcal: 360,
+            protein: 42,
           );
         case 'Snacks':
           return const FoodSuggestionData(
-            title: 'Apple slices & peanut butter',
-            subtitle: '210 kcal · 5g protein',
-            kcal: 210,
-            protein: 5,
+            title: 'Apple Slices & 1 Boiled Egg',
+            subtitle: '140 kcal · 7g protein · High fiber',
+            swapTip: 'Swap packaged cookies for whole fresh apple slices — rich in pectin fiber to suppress hunger.',
+            savingsKcal: 130,
+            kcal: 140,
+            protein: 7,
           );
         case 'Dinner':
+          return const FoodSuggestionData(
+            title: 'Baked Salmon, Steamed Asparagus & Veggies',
+            subtitle: '380 kcal · 36g protein · Heart healthy',
+            swapTip: 'Swap creamy pasta for baked salmon & steamed asparagus — packed with omega-3s for fast fat loss.',
+            savingsKcal: 210,
+            kcal: 380,
+            protein: 36,
+          );
+        case 'Recovery':
         default:
           return const FoodSuggestionData(
-            title: 'Baked salmon, asparagus & potato',
-            subtitle: '480 kcal · 38g protein',
-            kcal: 480,
-            protein: 38,
+            title: 'Chamomile Herbal Tea & 1 Glass Water',
+            subtitle: '0 kcal · Overnight cellular recovery',
+            swapTip: 'All daily meals logged! Stay hydrated with herbal tea for optimal overnight recovery.',
+            savingsKcal: 0,
+            kcal: 0,
+            protein: 0,
           );
       }
     } else if (c == 'Middle Eastern') {
       switch (mealType) {
         case 'Breakfast':
           return const FoodSuggestionData(
-            title: 'Shakshuka with whole wheat pita',
-            subtitle: '320 kcal · 15g protein',
-            kcal: 320,
-            protein: 15,
+            title: 'Shakshuka (Low Oil) with Whole Wheat Pita',
+            subtitle: '250 kcal · 16g protein · Clean start',
+            swapTip: 'Poach eggs directly in tomato-bell pepper stew instead of deep frying to save 120 kcal!',
+            savingsKcal: 120,
+            kcal: 250,
+            protein: 16,
           );
         case 'Lunch':
           return const FoodSuggestionData(
-            title: 'Shish Tawook with rice & hummus',
-            subtitle: '520 kcal · 40g protein',
-            kcal: 520,
-            protein: 40,
+            title: 'Shish Tawook with Fattoush Salad & Hummus',
+            subtitle: '410 kcal · 38g protein · High volume',
+            swapTip: 'Swap extra white rice for a mountain of crunchy fattoush salad with sumac.',
+            savingsKcal: 150,
+            kcal: 410,
+            protein: 38,
           );
         case 'Snacks':
           return const FoodSuggestionData(
-            title: '3 Medjool dates & Arabic coffee',
-            subtitle: '210 kcal · 4g protein',
-            kcal: 210,
-            protein: 4,
+            title: '2 Medjool Dates, Arabic Coffee & Walnuts',
+            subtitle: '130 kcal · 3g protein · Natural energy',
+            swapTip: 'Swap sugary baklava for fresh medjool dates & walnuts for natural sustained energy.',
+            savingsKcal: 140,
+            kcal: 130,
+            protein: 3,
           );
         case 'Dinner':
+          return const FoodSuggestionData(
+            title: 'Lentil Soup with Lemon & Grilled Chicken Skewer',
+            subtitle: '360 kcal · 38g protein · Low calorie',
+            swapTip: 'Swap thick pita bread for warm spiced lentil soup with fresh lemon.',
+            savingsKcal: 160,
+            kcal: 360,
+            protein: 38,
+          );
+        case 'Recovery':
         default:
           return const FoodSuggestionData(
-            title: 'Mixed grill skewers & lentil soup',
-            subtitle: '490 kcal · 46g protein',
-            kcal: 490,
-            protein: 46,
+            title: 'Warm Anise / Cardamom Herbal Tea',
+            subtitle: '0 kcal · Rest & hydration mode',
+            swapTip: 'All meals recorded! Unwind with warm cardamom or anise tea for effortless digestion.',
+            savingsKcal: 0,
+            kcal: 0,
+            protein: 0,
           );
       }
     } else {
-      // Bangladeshi default
+      // Bangladeshi default: Clean, Healthy, High-Volume Meals!
       switch (mealType) {
         case 'Breakfast':
           return const FoodSuggestionData(
-            title: '2 Ruti, 1 Dim Bhaji & Cha',
-            subtitle: '390 kcal · 15g protein',
-            kcal: 390,
-            protein: 15,
+            title: '2 Boiled Eggs, Mixed Sabji & Lal Ruti',
+            subtitle: '260 kcal · 18g clean protein · 0g oil',
+            swapTip: 'Swap fried eggs & paratha for 2 boiled eggs & sabji — doubles food volume with 0g cooking oil and saves 280 kcal!',
+            savingsKcal: 280,
+            kcal: 260,
+            protein: 18,
           );
         case 'Lunch':
           return const FoodSuggestionData(
-            title: '1 Plate Bhat, Chicken & Dal',
-            subtitle: '600 kcal · 35g protein',
-            kcal: 600,
-            protein: 35,
+            title: 'Half Plate Bhat, Chicken & Big Bowl Dal',
+            subtitle: '410 kcal · 34g protein · High volume',
+            swapTip: 'Keep rice to half plate (150g) and double your dal & salad volume — cuts 200 kcal without feeling hungry.',
+            savingsKcal: 200,
+            kcal: 410,
+            protein: 34,
           );
         case 'Snacks':
           return const FoodSuggestionData(
-            title: 'Chanachur & 1 Cup Cha',
-            subtitle: '220 kcal · 6g protein',
-            kcal: 220,
-            protein: 6,
+            title: 'Boiled Chola, Cucumber Salad & Green Tea',
+            subtitle: '120 kcal · 7g protein · 0g oil',
+            swapTip: 'Swap fried singara or chanachur for boiled chola & cucumber — zero unhealthy fat and saves 180 kcal.',
+            savingsKcal: 180,
+            kcal: 120,
+            protein: 7,
           );
         case 'Dinner':
+          return const FoodSuggestionData(
+            title: 'Half Plate Bhat or 2 Lal Ruti, Rui Fish & Sabji',
+            subtitle: '330 kcal · 26g protein · Balanced plate',
+            swapTip: 'Both half plate rice (150g) or 2 ruti fit comfortably! Pair with high-volume dal & sabji to stay full without surplus calories.',
+            savingsKcal: 190,
+            kcal: 330,
+            protein: 26,
+          );
+        case 'Recovery':
         default:
           return const FoodSuggestionData(
-            title: '2 Ruti, fish curry & veg bhaji',
-            subtitle: '470 kcal · 29g protein',
-            kcal: 470,
-            protein: 29,
+            title: 'Warm Rong Cha / Green Tea & Water',
+            subtitle: '0 kcal · Overnight hydration & recovery',
+            swapTip: 'All meals logged today! Drink 1 glass of water or green tea to aid metabolism and restful sleep.',
+            savingsKcal: 0,
+            kcal: 0,
+            protein: 0,
           );
       }
     }

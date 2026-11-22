@@ -8,6 +8,7 @@ import '../utils/food_data.dart';
 import '../widgets/caloriq_logo.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_card.dart';
+import '../widgets/glassy_badge.dart';
 import 'login_screen.dart';
 import 'onboarding_screen.dart';
 
@@ -186,12 +187,23 @@ class ProfileScreen extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 2),
-                                Text(
-                                  '${FoodData.cuisineFlags[profile.cuisine] ?? '🇧🇩'} ${profile.cuisine}',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xFF8A8A96),
-                                  ),
+                                Row(
+                                  children: [
+                                    GlassyBadge.flag(
+                                      FoodData.cuisineFlags[profile.cuisine] ?? '🇧🇩',
+                                      size: 22,
+                                      fontSize: 13,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      profile.cuisine,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF8A8A96),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -437,9 +449,10 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            Text(
+                            GlassyBadge.flag(
                               item['flag']!,
-                              style: const TextStyle(fontSize: 24),
+                              size: 36,
+                              fontSize: 20,
                             ),
                             const SizedBox(width: 14),
                             Expanded(
