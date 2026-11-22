@@ -113,7 +113,7 @@ class _FloatingNavBarState extends State<FloatingNavBar>
     _ensureInitialized();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barBg = isDark ? const Color(0xFF1D1D26) : const Color(0xFF14141A);
+    final barBg = isDark ? const Color(0xFF1D1D26) : Colors.white;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     const double barWidth = 320.0;
@@ -200,7 +200,7 @@ class _FloatingNavBarState extends State<FloatingNavBar>
                             // 1. Clean crisp base drop shadow for elevation
                             BoxShadow(
                               color: Colors.black.withValues(
-                                alpha: isDark ? 0.45 : 0.25,
+                                alpha: isDark ? 0.45 : 0.16,
                               ),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
@@ -345,22 +345,20 @@ class CurvedNavBarPainter extends CustomPainter {
     // Elevation drop shadow
     canvas.drawShadow(
       path,
-      Colors.black.withValues(alpha: isDark ? 0.6 : 0.35),
-      isDark ? 20 : 18,
-      false,
+      Colors.black.withValues(alpha: isDark ? 0.6 : 0.08),
+      isDark ? 20 : 16,
+      true,
     );
 
     // Draw solid bar body
     canvas.drawPath(path, paint);
 
-    // Subtle outline stroke along the bar and scoop curve in dark mode
-    if (isDark) {
-      final borderPaint = Paint()
-        ..color = const Color(0xFF333342)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0;
-      canvas.drawPath(path, borderPaint);
-    }
+    // Subtle outline stroke along the bar and scoop curve
+    final borderPaint = Paint()
+      ..color = isDark ? const Color(0xFF333342) : const Color(0xFFE9E6DF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    canvas.drawPath(path, borderPaint);
   }
 
   @override

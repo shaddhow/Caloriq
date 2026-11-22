@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -144,12 +143,16 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
     final userProvider =
         Provider.of<UserProfileProvider>(context, listen: false);
+    if (userProvider.isLoading) {
+      await userProvider.loadUserFromPrefs();
+    }
+    if (!mounted) return;
+
     final bool hasProfile =
         isOnboardedPref || hasProfileData || userProvider.isOnboarded;
 
-    // In debug/testing mode, always start from OnboardingScreen for convenience
     final Widget targetScreen =
-        (!kDebugMode && hasProfile) ? const MainScreen() : const OnboardingScreen();
+        hasProfile ? const MainScreen() : const OnboardingScreen();
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(

@@ -100,35 +100,55 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 2. DARK HERO CARD (Calorie Ring + 3 Macro Progress Bars)
+              // 2. VIBRANT HERO CARD (Daily Budget - Tiya Lime Accent in Light Mode)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF26262F)
-                      : const Color(0xFF15151B),
+                  color: isDark ? const Color(0xFF26262F) : AppTheme.lime,
                   borderRadius: AppTheme.cardsBorderRadius,
+                  border: isDark
+                      ? null
+                      : Border.all(
+                          color: AppTheme.ink.withValues(alpha: 0.08),
+                          width: 1,
+                        ),
+                  boxShadow: isDark
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: AppTheme.lime.withValues(alpha: 0.40),
+                            blurRadius: 20,
+                            offset: const Offset(0, 6),
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Daily budget',
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF9A9AA6),
+                            fontWeight: FontWeight.w700,
+                            color: isDark
+                                ? const Color(0xFF9A9AA6)
+                                : const Color(0xFF2E3520),
                           ),
                         ),
                         Text(
                           '$budget kcal',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white : AppTheme.ink,
                           ),
                         ),
                       ],
@@ -140,6 +160,7 @@ class HomeScreen extends StatelessWidget {
                       eatenKcal: totalEaten,
                       budgetKcal: budget,
                       size: 196,
+                      isDark: isDark,
                     ),
                     const SizedBox(height: 16),
 
@@ -148,17 +169,19 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         RichText(
                           text: TextSpan(
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Plus Jakarta Sans',
                               fontSize: 13,
-                              color: Color(0xFF9A9AA6),
+                              color: isDark
+                                  ? const Color(0xFF9A9AA6)
+                                  : const Color(0xFF384227),
                             ),
                             children: [
                               TextSpan(
                                 text: '$totalEaten',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                                  color: isDark ? Colors.white : AppTheme.ink,
                                 ),
                               ),
                               const TextSpan(text: ' eaten'),
@@ -177,17 +200,19 @@ class HomeScreen extends StatelessWidget {
                         else
                           RichText(
                             text: TextSpan(
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Plus Jakarta Sans',
                                 fontSize: 13,
-                                color: Color(0xFF9A9AA6),
+                                color: isDark
+                                    ? const Color(0xFF9A9AA6)
+                                    : const Color(0xFF384227),
                               ),
                               children: [
                                 TextSpan(
                                   text: '$burned',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.white,
+                                    color: isDark ? Colors.white : AppTheme.ink,
                                   ),
                                 ),
                                 const TextSpan(text: ' burned'),
@@ -198,7 +223,12 @@ class HomeScreen extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 18),
-                    const Divider(color: Color(0xFF2E2E38), height: 1),
+                    Divider(
+                      color: isDark
+                          ? const Color(0xFF2E2E38)
+                          : AppTheme.ink.withValues(alpha: 0.12),
+                      height: 1,
+                    ),
                     const SizedBox(height: 16),
 
                     // 3 Macro Targets vs Consumed (Protein, Carbs, Fat)
@@ -209,6 +239,7 @@ class HomeScreen extends StatelessWidget {
                           consumed: mealProvider.totalProtein.round(),
                           target: (budget * 0.30 / 4).round(),
                           color: const Color(0xFFFF725E),
+                          isDark: isDark,
                         ),
                         const SizedBox(width: 14),
                         _buildMacroColumn(
@@ -216,6 +247,7 @@ class HomeScreen extends StatelessWidget {
                           consumed: mealProvider.totalCarbs.round(),
                           target: (budget * 0.45 / 4).round(),
                           color: const Color(0xFFF5B842),
+                          isDark: isDark,
                         ),
                         const SizedBox(width: 14),
                         _buildMacroColumn(
@@ -223,6 +255,7 @@ class HomeScreen extends StatelessWidget {
                           consumed: mealProvider.totalFat.round(),
                           target: (budget * 0.25 / 9).round(),
                           color: const Color(0xFF56C5C5),
+                          isDark: isDark,
                         ),
                       ],
                     ),
@@ -318,48 +351,64 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 18),
 
-              // 5. "EAT NEXT" SUGGESTION CARD (Lime Accent)
+              // 5. "EAT NEXT" SUGGESTION CARD
               CustomCard(
-                backgroundColor: AppTheme.lime,
+                backgroundColor:
+                    isDark ? const Color(0xFF1F1F27) : Colors.white,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        const Icon(
-                          Icons.auto_awesome,
-                          size: 18,
-                          color: AppTheme.ink,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'EAT NEXT · ${suggestion.mealType.toUpperCase()}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                            letterSpacing: 0.6,
-                            color: AppTheme.ink,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppTheme.lime.withValues(alpha: 0.18)
+                                : AppTheme.lime,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.restaurant_menu_rounded,
+                                size: 14,
+                                color: isDark ? AppTheme.lime : AppTheme.ink,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'EAT NEXT · ${suggestion.mealType.toUpperCase()}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                  letterSpacing: 0.6,
+                                  color: isDark ? AppTheme.lime : AppTheme.ink,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     Text(
                       suggestion.title,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.ink,
-                        letterSpacing: -0.3,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : AppTheme.ink,
+                        letterSpacing: -0.4,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       suggestion.subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xB314141A),
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).hintColor,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -393,6 +442,7 @@ class HomeScreen extends StatelessWidget {
     required int consumed,
     required int target,
     required Color color,
+    required bool isDark,
   }) {
     final double progress =
         target > 0 ? (consumed / target).clamp(0.0, 1.0) : 0.0;
@@ -406,19 +456,21 @@ class HomeScreen extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
-                  color: Color(0xFF9A9AA6),
+                  color: isDark
+                      ? const Color(0xFF9A9AA6)
+                      : const Color(0xFF384227),
                 ),
               ),
               Text(
                 '${consumed}g',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : AppTheme.ink,
                 ),
               ),
             ],
@@ -431,7 +483,9 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   height: 5,
                   width: double.infinity,
-                  color: const Color(0xFF2E2E38),
+                  color: isDark
+                      ? const Color(0xFF2E2E38)
+                      : AppTheme.ink.withValues(alpha: 0.12),
                 ),
                 FractionallySizedBox(
                   widthFactor: progress,
@@ -449,10 +503,12 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Target ${target}g',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF7A7A88),
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? const Color(0xFF7A7A88)
+                  : const Color(0xFF4C5835),
             ),
           ),
         ],
@@ -1048,11 +1104,13 @@ class _CalorieRing extends StatefulWidget {
   final int eatenKcal;
   final int budgetKcal;
   final double size;
+  final bool isDark;
 
   const _CalorieRing({
     required this.eatenKcal,
     required this.budgetKcal,
     this.size = 196,
+    this.isDark = true,
   });
 
   @override
@@ -1084,7 +1142,8 @@ class _CalorieRingState extends State<_CalorieRing>
   void didUpdateWidget(covariant _CalorieRing oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.eatenKcal != widget.eatenKcal ||
-        oldWidget.budgetKcal != widget.budgetKcal) {
+        oldWidget.budgetKcal != widget.budgetKcal ||
+        oldWidget.isDark != widget.isDark) {
       _controller.forward(from: 0.0);
     }
   }
@@ -1116,6 +1175,7 @@ class _CalorieRingState extends State<_CalorieRing>
                   budgetKcal: widget.budgetKcal,
                   progress: _animation.value,
                   strokeWidth: 14.0,
+                  isDark: widget.isDark,
                 ),
               ),
               Column(
@@ -1123,12 +1183,12 @@ class _CalorieRingState extends State<_CalorieRing>
                 children: [
                   Text(
                     '${isSurplus ? remaining.abs() : remaining}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 42,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -1.5,
-                      color: Colors.white,
+                      color: widget.isDark ? Colors.white : AppTheme.ink,
                       height: 1.0,
                     ),
                   ),
@@ -1138,10 +1198,12 @@ class _CalorieRingState extends State<_CalorieRing>
                     style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                       color: isSurplus
                           ? AppTheme.coral
-                          : const Color(0xFF9A9AA6),
+                          : (widget.isDark
+                              ? const Color(0xFF9A9AA6)
+                              : const Color(0xFF384227)),
                     ),
                   ),
                 ],
@@ -1160,12 +1222,14 @@ class _CalorieRingPainter extends CustomPainter {
   final int budgetKcal;
   final double progress;
   final double strokeWidth;
+  final bool isDark;
 
   _CalorieRingPainter({
     required this.eatenKcal,
     required this.budgetKcal,
     required this.progress,
     required this.strokeWidth,
+    required this.isDark,
   });
 
   @override
@@ -1175,7 +1239,9 @@ class _CalorieRingPainter extends CustomPainter {
 
     // Background Track
     final trackPaint = Paint()
-      ..color = const Color(0xFF2A2A33)
+      ..color = isDark
+          ? const Color(0xFF2A2A33)
+          : AppTheme.ink.withValues(alpha: 0.12)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -1191,7 +1257,9 @@ class _CalorieRingPainter extends CustomPainter {
 
     final isSurplus = eatenKcal > budgetKcal;
     final activePaint = Paint()
-      ..color = isSurplus ? AppTheme.coral : AppTheme.lime
+      ..color = isSurplus
+          ? AppTheme.coral
+          : (isDark ? AppTheme.lime : AppTheme.ink)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -1211,6 +1279,7 @@ class _CalorieRingPainter extends CustomPainter {
   bool shouldRepaint(covariant _CalorieRingPainter oldDelegate) {
     return oldDelegate.eatenKcal != eatenKcal ||
         oldDelegate.budgetKcal != budgetKcal ||
-        oldDelegate.progress != progress;
+        oldDelegate.progress != progress ||
+        oldDelegate.isDark != isDark;
   }
 }
